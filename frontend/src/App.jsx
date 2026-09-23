@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import Login from './pages/Login'
 import Register from './pages/Register'
 import ForgotPassword from './pages/ForgotPassword'
+import Dashboard from './pages/Dashboard'
 import './App.css'
 
 function App() {
@@ -13,7 +14,7 @@ function App() {
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
                 <Route path="/forgot-password" element={<ForgotPassword />} />
-                <Route path="/dashboard" element={<h1>Dashboard (coming soon)</h1>} />
+                <Route path="/dashboard" element={<Dashboard />} />
             </Routes>
         </Router>
     )
