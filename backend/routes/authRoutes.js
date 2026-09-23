@@ -1,15 +1,13 @@
 import express from 'express'
 import { supabaseAdmin } from '../config/supabaseAdmin.js'
 
-
 const router = express.Router()
 
-//post register
+// POST register
 router.post('/register', async (req, res) => {
     const { fullName, email, password } = req.body
 
-    if (!fullName || !email, password) {
-
+    if (!fullName || !email || !password) {
         return res.status(400).json({ error: 'Full name, email, and password are required' })
     }
 
@@ -21,18 +19,16 @@ router.post('/register', async (req, res) => {
     })
 
     if (error) {
-
-        if (error.message.includes('already registerd')) {
-            return res.status(409).json({ erro: 'Email already registered' })
+        if (error.message.includes('already registered')) {
+            return res.status(409).json({ error: 'Email already registered' })
         }
         return res.status(400).json({ error: 'Registration failed' })
     }
-    return res.status(201).json({ message: 'User created', userId: data.user.id })
 
+    return res.status(201).json({ message: 'User created', userId: data.user.id })
 })
 
-//post login
-
+// POST login
 router.post('/login', async (req, res) => {
     const { email, password } = req.body
 
@@ -48,14 +44,14 @@ router.post('/login', async (req, res) => {
     if (error) {
         return res.status(401).json({ error: 'Invalid credentials' })
     }
+
     return res.status(200).json({
         message: 'Login successful',
         token: data.session.access_token,
     })
 })
 
-//post logout
-
+// POST logout
 router.post('/logout', async (req, res) => {
     const { error } = await supabaseAdmin.auth.signOut()
 
@@ -66,7 +62,7 @@ router.post('/logout', async (req, res) => {
     return res.status(200).json({ message: 'Logged out successfully' })
 })
 
-// post rest pass
+// POST reset password
 router.post('/reset', async (req, res) => {
     const { email } = req.body
 
