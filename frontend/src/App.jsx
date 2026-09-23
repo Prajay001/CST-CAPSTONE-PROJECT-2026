@@ -7,11 +7,12 @@ import './App.css'
 function App() {
     return (
         <Router>
+
             <Routes>
                 <Route path="/" element={<Navigate to="/login" />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
-                <Route path="/forgot-password" element={<ForgotPass />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route path="/dashboard" element={<h1>Dashboard (coming soon)</h1>} />
             </Routes>
         </Router>
