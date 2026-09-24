@@ -19,7 +19,7 @@ router.post('/register', async (req, res) => {
     })
 
     if (error) {
-        if (error.message.includes('already registered')) {
+        if (error.message.toLowerCase().includes('already')) {
             return res.status(409).json({ error: 'Email already registered' })
         }
         return res.status(400).json({ error: 'Registration failed' })
