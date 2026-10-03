@@ -4,6 +4,7 @@ import Register from './pages/Register'
 import ForgotPassword from './pages/ForgotPassword'
 import Dashboard from './pages/Dashboard'
 import ChangePassword from './pages/ChangePassword'
+import Profile from './pages/profile'
 import './App.css'
 
 function App() {
@@ -17,6 +18,7 @@ function App() {
                 <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/change-password" element={<ChangePassword />} />
+                <Route path="/profile" element={<Profile />} />
             </Routes>
         </Router>
     )
