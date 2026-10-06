@@ -43,6 +43,21 @@ function Dashboard() {
                 Change Password
             </button>
             <button
+                onClick={() => navigate('/admin')}
+                style={{
+                    padding: '10px 20px',
+                    background: '#7c3aed',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    marginTop: '20px',
+                    marginRight: '10px',
+                }}
+            >
+                Admin
+            </button>
+            <button
                 onClick={handleLogout}
                 style={{
                     padding: '10px 20px',
