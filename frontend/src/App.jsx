@@ -7,6 +7,7 @@ import Dashboard from './pages/Dashboard'
 import ChangePassword from './pages/ChangePassword'
 import Profile from './pages/profile'
 import Admin from './pages/admin'
+import Subscriptions from './pages/Subscriptions'
 import './App.css'
 
 function App() {
@@ -23,6 +24,8 @@ function App() {
                 <Route path="/change-password" element={<ChangePassword />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/admin" element={<Admin />} />
+                <Route path="/subscriptions" element={<Subscriptions />} />
+
             </Routes>
         </Router>
     )
