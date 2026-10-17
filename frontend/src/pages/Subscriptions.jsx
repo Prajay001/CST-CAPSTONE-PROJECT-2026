@@ -14,6 +14,7 @@ function Subscriptions() {
     const [nextBillingDate, setNextBillingDate] = useState('');
     const [isTrial, setIsTrial] = useState(false);
     const [category, setCategory] = useState('Entertainment');
+    const [editingId, setEditingId] = useState(null); // null = adding, id = editing
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
 
@@ -25,6 +26,7 @@ function Subscriptions() {
             .order('next_billing_date', { ascending: true });
 
         if (loadError) {
+            console.error('Load error:', loadError);
             setError('Could not load your subscriptions. Please try again.');
             return;
         }
@@ -44,6 +46,56 @@ function Subscriptions() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
+    // Put the form back to its empty "add" state
+    function resetForm() {
+        setServiceName('');
+        setCost('');
+        setBillingCycle('Monthly');
+        setNextBillingDate('');
+        setIsTrial(false);
+        setCategory('Entertainment');
+        setEditingId(null);
+    }
+
+    // Fill the form with the row the user wants to edit
+    function handleEdit(s) {
+        setError('');
+        setSuccess('');
+        setEditingId(s.id);
+        setServiceName(s.service_name);
+        setCost(String(s.cost));
+        setBillingCycle(s.billing_cycle);
+        setNextBillingDate(s.next_billing_date);
+        setIsTrial(s.is_trial);
+        setCategory(s.category);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    async function handleDelete(id) {
+        const confirmed = window.confirm(
+            'Delete this subscription? This cannot be undone.'
+        );
+        if (!confirmed) return;
+
+        setError('');
+        setSuccess('');
+
+        const { error: deleteError } = await supabase
+            .from('subscriptions')
+            .delete()
+            .eq('id', id);
+
+        if (deleteError) {
+            console.error('Delete error:', deleteError);
+            setError('Could not delete the subscription. Please try again.');
+            return;
+        }
+
+        if (editingId === id) resetForm();
+        setSuccess('Subscription deleted.');
+        loadSubscriptions();
+    }
+
     async function handleSubmit(e) {
         e.preventDefault();
         setError('');
@@ -62,28 +114,46 @@ function Subscriptions() {
             return;
         }
 
-        const { error: insertError } = await supabase.from('subscriptions').insert({
+        const fields = {
             service_name: serviceName.trim(),
             cost: Number(cost),
             billing_cycle: billingCycle,
             next_billing_date: nextBillingDate,
             is_trial: isTrial,
             category: category,
-        });
+        };
 
-        if (insertError) {
-            // Generic message on purpose (no database details shown to the user)
-            setError('Could not save the subscription. Please try again.');
-            return;
+        if (editingId) {
+            // UPDATE an existing row
+            const { data, error: updateError } = await supabase
+                .from('subscriptions')
+                .update(fields)
+                .eq('id', editingId)
+                .select();
+
+            // RLS returns no error and no rows if the row is not the user's
+            if (updateError || !data || data.length === 0) {
+                console.error('Update error:', updateError);
+                setError('Could not update the subscription. Please try again.');
+                return;
+            }
+            setSuccess('Subscription updated.');
+        } else {
+            // INSERT a new row
+            const { error: insertError } = await supabase
+                .from('subscriptions')
+                .insert(fields);
+
+            if (insertError) {
+                console.error('Insert error:', insertError);
+                // Generic message on purpose (no database details shown to the user)
+                setError('Could not save the subscription. Please try again.');
+                return;
+            }
+            setSuccess('Subscription added.');
         }
 
-        setSuccess('Subscription added.');
-        setServiceName('');
-        setCost('');
-        setBillingCycle('Monthly');
-        setNextBillingDate('');
-        setIsTrial(false);
-        setCategory('Entertainment');
+        resetForm();
         loadSubscriptions();
     }
 
@@ -93,6 +163,8 @@ function Subscriptions() {
             <h2>My Subscriptions</h2>
 
             <form className="subs-form" onSubmit={handleSubmit}>
+                <h3>{editingId ? 'Edit subscription' : 'Add a subscription'}</h3>
+
                 <label htmlFor="serviceName">Service name</label>
                 <input
                     id="serviceName"
@@ -157,7 +229,14 @@ function Subscriptions() {
                 {error && <p className="error">{error}</p>}
                 {success && <p className="success">{success}</p>}
 
-                <button type="submit">Add subscription</button>
+                <button type="submit">
+                    {editingId ? 'Save changes' : 'Add subscription'}
+                </button>
+                {editingId && (
+                    <button type="button" className="subs-cancel" onClick={resetForm}>
+                        Cancel edit
+                    </button>
+                )}
             </form>
 
             <h3>Your list</h3>
@@ -174,6 +253,7 @@ function Subscriptions() {
                                 <th>Next billing</th>
                                 <th>Category</th>
                                 <th>Trial</th>
+                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -185,6 +265,18 @@ function Subscriptions() {
                                     <td>{s.next_billing_date}</td>
                                     <td>{s.category}</td>
                                     <td>{s.is_trial ? 'Yes' : 'No'}</td>
+                                    <td className="subs-actions">
+                                        <button type="button" onClick={() => handleEdit(s)}>
+                                            Edit
+                                        </button>
+                                        <button
+                                            type="button"
+                                            className="subs-delete"
+                                            onClick={() => handleDelete(s.id)}
+                                        >
+                                            Delete
+                                        </button>
+                                    </td>
                                 </tr>
                             ))}
                         </tbody>
