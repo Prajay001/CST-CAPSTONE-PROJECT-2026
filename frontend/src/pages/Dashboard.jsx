@@ -11,7 +11,22 @@ function Dashboard() {
 
     return (
         <div style={{ padding: '40px', textAlign: 'center' }}>
-            <h1>Dashboard (coming soon)</h1>
+            <h1>Dashboard</h1>
+            <button
+                onClick={() => navigate('/subscriptions')}
+                style={{
+                    padding: '10px 20px',
+                    background: '#047857',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    marginTop: '20px',
+                    marginRight: '10px',
+                }}
+            >
+                My Subscriptions
+            </button>
             <button
                 onClick={() => navigate('/profile')}
                 style={{
