@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
+import { filterAndSortSubscriptions } from '../utils/subscriptionFilters';
 
 const CATEGORIES = ['Entertainment', 'Productivity', 'Utilities', 'Health'];
 
@@ -18,12 +19,18 @@ function Subscriptions() {
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
 
-    // Get this user's subscriptions, soonest billing date first
+    // Search, filter and sort controls for the list
+    const [search, setSearch] = useState('');
+    const [trialFilter, setTrialFilter] = useState('All');
+    const [categoryFilter, setCategoryFilter] = useState('All');
+    const [cycleFilter, setCycleFilter] = useState('All');
+    const [sortBy, setSortBy] = useState('date');
+
+    // Get this user's subscriptions from the database
     async function loadSubscriptions() {
         const { data, error: loadError } = await supabase
             .from('subscriptions')
-            .select('*')
-            .order('next_billing_date', { ascending: true });
+            .select('*');
 
         if (loadError) {
             console.error('Load error:', loadError);
@@ -45,6 +52,23 @@ function Subscriptions() {
         init();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
+
+    // The rows actually shown: filtered and sorted from the full list
+    const visibleSubscriptions = filterAndSortSubscriptions(subscriptions, {
+        search: search,
+        trial: trialFilter,
+        category: categoryFilter,
+        cycle: cycleFilter,
+        sortBy: sortBy,
+    });
+
+    function clearFilters() {
+        setSearch('');
+        setTrialFilter('All');
+        setCategoryFilter('All');
+        setCycleFilter('All');
+        setSortBy('date');
+    }
 
     // Put the form back to its empty "add" state
     function resetForm() {
@@ -240,8 +264,88 @@ function Subscriptions() {
             </form>
 
             <h3>Your list</h3>
+
+            <div className="subs-controls">
+                <label htmlFor="search">
+                    Search by service name
+                    <input
+                        id="search"
+                        type="text"
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        placeholder="e.g. Spotify"
+                    />
+                </label>
+
+                <label htmlFor="trialFilter">
+                    Trial status
+                    <select
+                        id="trialFilter"
+                        value={trialFilter}
+                        onChange={(e) => setTrialFilter(e.target.value)}
+                    >
+                        <option value="All">All</option>
+                        <option value="Yes">Trial</option>
+                        <option value="No">Not a trial</option>
+                    </select>
+                </label>
+
+                <label htmlFor="categoryFilter">
+                    Category
+                    <select
+                        id="categoryFilter"
+                        value={categoryFilter}
+                        onChange={(e) => setCategoryFilter(e.target.value)}
+                    >
+                        <option value="All">All</option>
+                        {CATEGORIES.map((c) => (
+                            <option key={c} value={c}>
+                                {c}
+                            </option>
+                        ))}
+                    </select>
+                </label>
+
+                <label htmlFor="cycleFilter">
+                    Billing cycle
+                    <select
+                        id="cycleFilter"
+                        value={cycleFilter}
+                        onChange={(e) => setCycleFilter(e.target.value)}
+                    >
+                        <option value="All">All</option>
+                        <option value="Monthly">Monthly</option>
+                        <option value="Annual">Annual</option>
+                    </select>
+                </label>
+
+                <label htmlFor="sortBy">
+                    Sort by
+                    <select
+                        id="sortBy"
+                        value={sortBy}
+                        onChange={(e) => setSortBy(e.target.value)}
+                    >
+                        <option value="date">Next billing date (soonest first)</option>
+                        <option value="cost">Cost (highest first)</option>
+                    </select>
+                </label>
+
+                <button type="button" onClick={clearFilters}>
+                    Clear filters
+                </button>
+            </div>
+
+            {subscriptions.length > 0 && (
+                <p>
+                    Showing {visibleSubscriptions.length} of {subscriptions.length}
+                </p>
+            )}
+
             {subscriptions.length === 0 ? (
                 <p>No subscriptions yet. Add your first one above.</p>
+            ) : visibleSubscriptions.length === 0 ? (
+                <p>No subscriptions match your search or filters.</p>
             ) : (
                 <div className="table-wrap">
                     <table className="subs-table">
@@ -257,7 +361,7 @@ function Subscriptions() {
                             </tr>
                         </thead>
                         <tbody>
-                            {subscriptions.map((s) => (
+                            {visibleSubscriptions.map((s) => (
                                 <tr key={s.id}>
                                     <td>{s.service_name}</td>
                                     <td>${Number(s.cost).toFixed(2)}</td>

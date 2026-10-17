@@ -267,3 +267,18 @@ body {
 .subs-cancel {
     background: #64748b;
 }
+
+.subs-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.subs-controls label {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 0.9rem;
+}
