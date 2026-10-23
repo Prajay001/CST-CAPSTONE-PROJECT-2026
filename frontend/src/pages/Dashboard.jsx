@@ -5,11 +5,18 @@ import {
     calculateMonthlyBurnRate,
     calculateYearlyProjection,
 } from '../utils/calculations'
+import {
+    getAlertSubscriptions,
+    daysUntilBilling,
+    describeDueDate,
+} from '../utils/alerts'
+import '../styles/app-pages.css'
 
 function Dashboard() {
     const navigate = useNavigate()
     const [subscriptions, setSubscriptions] = useState([])
     const [loadError, setLoadError] = useState('')
+    const [loaded, setLoaded] = useState(false)
 
     useEffect(() => {
         async function loadSubscriptions() {
@@ -26,9 +33,10 @@ function Dashboard() {
             if (error) {
                 console.error('Dashboard load error:', error)
                 setLoadError('Could not load your subscription totals.')
-                return
+            } else {
+                setSubscriptions(data)
             }
-            setSubscriptions(data)
+            setLoaded(true)
         }
         loadSubscriptions()
     }, [navigate])
@@ -40,120 +48,85 @@ function Dashboard() {
 
     const monthlyBurnRate = calculateMonthlyBurnRate(subscriptions)
     const yearlyProjection = calculateYearlyProjection(subscriptions)
-
-    const cardStyle = {
-        background: '#f0f9ff',
-        border: '1px solid #bae6fd',
-        borderRadius: '12px',
-        padding: '20px 28px',
-        minWidth: '220px',
-    }
-    const cardLabelStyle = { color: '#075985', fontSize: '0.95rem', margin: 0 }
-    const cardValueStyle = { fontSize: '2rem', fontWeight: 'bold', margin: '8px 0 0 0' }
+    const alertSubscriptions = getAlertSubscriptions(subscriptions)
 
     return (
-        <div style={{ padding: '40px', textAlign: 'center' }}>
-            <h1>Dashboard</h1>
+        <div className="sn-page">
+            <header className="sn-header">
+                <h1 className="sn-title">Subscription Sniper</h1>
+                <nav className="sn-nav" aria-label="Main navigation">
+                    <button className="sn-btn" onClick={() => navigate('/subscriptions')}>
+                        My Subscriptions
+                    </button>
+                    <button
+                        className="sn-btn sn-btn-secondary"
+                        onClick={() => navigate('/profile')}
+                    >
+                        Profile
+                    </button>
+                    <button
+                        className="sn-btn sn-btn-secondary"
+                        onClick={() => navigate('/change-password')}
+                    >
+                        Change Password
+                    </button>
+                    <button
+                        className="sn-btn sn-btn-secondary"
+                        onClick={() => navigate('/admin')}
+                    >
+                        Admin
+                    </button>
+                    <button className="sn-btn sn-btn-danger" onClick={handleLogout}>
+                        Log Out
+                    </button>
+                </nav>
+            </header>
+
+            <h2 className="sn-heading">Dashboard</h2>
 
             {loadError && <p className="error">{loadError}</p>}
 
-            <div
-                style={{
-                    display: 'flex',
-                    flexWrap: 'wrap',
-                    justifyContent: 'center',
-                    gap: '20px',
-                    marginTop: '20px',
-                }}
-            >
-                <div style={cardStyle}>
-                    <p style={cardLabelStyle}>Monthly Burn Rate</p>
-                    <p style={cardValueStyle}>${monthlyBurnRate.toFixed(2)}</p>
+            {alertSubscriptions.length > 0 && (
+                <div className="sn-alert" role="alert">
+                    <strong>
+                        48-hour alert: {alertSubscriptions.length} subscription
+                        {alertSubscriptions.length > 1 ? 's' : ''} billing soon
+                    </strong>
+                    <ul>
+                        {alertSubscriptions.map((s) => (
+                            <li key={s.id}>
+                                {s.service_name} (${Number(s.cost).toFixed(2)}) bills{' '}
+                                {describeDueDate(daysUntilBilling(s.next_billing_date))} (
+                                {s.next_billing_date})
+                            </li>
+                        ))}
+                    </ul>
                 </div>
-                <div style={cardStyle}>
-                    <p style={cardLabelStyle}>Yearly Projection</p>
-                    <p style={cardValueStyle}>${yearlyProjection.toFixed(2)}</p>
+            )}
+
+            <div className="sn-stats">
+                <div className="sn-stat">
+                    <p className="sn-stat-label">Monthly Burn Rate</p>
+                    <p className="sn-stat-value">${monthlyBurnRate.toFixed(2)}</p>
                 </div>
-                <div style={cardStyle}>
-                    <p style={cardLabelStyle}>Subscriptions</p>
-                    <p style={cardValueStyle}>{subscriptions.length}</p>
+                <div className="sn-stat">
+                    <p className="sn-stat-label">Yearly Projection</p>
+                    <p className="sn-stat-value">${yearlyProjection.toFixed(2)}</p>
+                </div>
+                <div className="sn-stat">
+                    <p className="sn-stat-label">Subscriptions</p>
+                    <p className="sn-stat-value">{subscriptions.length}</p>
                 </div>
             </div>
 
-            <button
-                onClick={() => navigate('/subscriptions')}
-                style={{
-                    padding: '10px 20px',
-                    background: '#047857',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '8px',
-                    cursor: 'pointer',
-                    marginTop: '20px',
-                    marginRight: '10px',
-                }}
-            >
-                My Subscriptions
-            </button>
-            <button
-                onClick={() => navigate('/profile')}
-                style={{
-                    padding: '10px 20px',
-                    background: '#0284c7',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '8px',
-                    cursor: 'pointer',
-                    marginTop: '20px',
-                    marginRight: '10px',
-                }}
-            >
-                Profile
-            </button>
-            <button
-                onClick={() => navigate('/change-password')}
-                style={{
-                    padding: '10px 20px',
-                    background: '#64748b',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '8px',
-                    cursor: 'pointer',
-                    marginTop: '20px',
-                    marginRight: '10px',
-                }}
-            >
-                Change Password
-            </button>
-            <button
-                onClick={() => navigate('/admin')}
-                style={{
-                    padding: '10px 20px',
-                    background: '#7c3aed',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '8px',
-                    cursor: 'pointer',
-                    marginTop: '20px',
-                    marginRight: '10px',
-                }}
-            >
-                Admin
-            </button>
-            <button
-                onClick={handleLogout}
-                style={{
-                    padding: '10px 20px',
-                    background: '#dc2626',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '8px',
-                    cursor: 'pointer',
-                    marginTop: '20px',
-                }}
-            >
-                Log Out
-            </button>
+            {loaded && !loadError && subscriptions.length === 0 && (
+                <div className="sn-card sn-empty">
+                    <p>You have no subscriptions yet.</p>
+                    <button className="sn-btn" onClick={() => navigate('/subscriptions')}>
+                        Add your first subscription
+                    </button>
+                </div>
+            )}
         </div>
     )
 }

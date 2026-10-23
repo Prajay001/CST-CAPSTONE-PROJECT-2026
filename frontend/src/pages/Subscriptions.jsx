@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
 import { filterAndSortSubscriptions } from '../utils/subscriptionFilters';
+import { isAlertDue, trialLabel } from '../utils/alerts';
+import '../styles/app-pages.css';
 
 const CATEGORIES = ['Entertainment', 'Productivity', 'Utilities', 'Health'];
 
@@ -182,213 +184,285 @@ function Subscriptions() {
     }
 
     return (
-        <div className="subs-page">
-            <h1 className="brand">Subscription Sniper</h1>
-            <h2>My Subscriptions</h2>
-
-            <form className="subs-form" onSubmit={handleSubmit}>
-                <h3>{editingId ? 'Edit subscription' : 'Add a subscription'}</h3>
-
-                <label htmlFor="serviceName">Service name</label>
-                <input
-                    id="serviceName"
-                    type="text"
-                    value={serviceName}
-                    onChange={(e) => setServiceName(e.target.value)}
-                    placeholder="e.g. Netflix"
-                />
-
-                <label htmlFor="cost">Cost ($)</label>
-                <input
-                    id="cost"
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    value={cost}
-                    onChange={(e) => setCost(e.target.value)}
-                    placeholder="15.99"
-                />
-
-                <label htmlFor="billingCycle">Billing cycle</label>
-                <select
-                    id="billingCycle"
-                    value={billingCycle}
-                    onChange={(e) => setBillingCycle(e.target.value)}
-                >
-                    <option value="Monthly">Monthly</option>
-                    <option value="Annual">Annual</option>
-                </select>
-
-                <label htmlFor="nextBillingDate">Next billing date</label>
-                <input
-                    id="nextBillingDate"
-                    type="date"
-                    value={nextBillingDate}
-                    onChange={(e) => setNextBillingDate(e.target.value)}
-                />
-
-                <label htmlFor="category">Category</label>
-                <select
-                    id="category"
-                    value={category}
-                    onChange={(e) => setCategory(e.target.value)}
-                >
-                    {CATEGORIES.map((c) => (
-                        <option key={c} value={c}>
-                            {c}
-                        </option>
-                    ))}
-                </select>
-
-                <label className="subs-check" htmlFor="isTrial">
-                    <input
-                        id="isTrial"
-                        type="checkbox"
-                        checked={isTrial}
-                        onChange={(e) => setIsTrial(e.target.checked)}
-                    />
-                    Is this a trial?
-                </label>
-
-                {error && <p className="error">{error}</p>}
-                {success && <p className="success">{success}</p>}
-
-                <button type="submit">
-                    {editingId ? 'Save changes' : 'Add subscription'}
-                </button>
-                {editingId && (
-                    <button type="button" className="subs-cancel" onClick={resetForm}>
-                        Cancel edit
+        <div className="sn-page">
+            <header className="sn-header">
+                <h1 className="sn-title">Subscription Sniper</h1>
+                <nav className="sn-nav" aria-label="Main navigation">
+                    <button
+                        type="button"
+                        className="sn-btn sn-btn-secondary"
+                        onClick={() => navigate('/dashboard')}
+                    >
+                        Back to Dashboard
                     </button>
-                )}
-            </form>
+                </nav>
+            </header>
 
-            <h3>Your list</h3>
+            <h2 className="sn-heading">My Subscriptions</h2>
 
-            <div className="subs-controls">
-                <label htmlFor="search">
-                    Search by service name
-                    <input
-                        id="search"
-                        type="text"
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                        placeholder="e.g. Spotify"
-                    />
-                </label>
+            <section className="sn-card" aria-labelledby="form-heading">
+                <h3 id="form-heading" className="sn-subheading">
+                    {editingId ? 'Edit subscription' : 'Add a subscription'}
+                </h3>
 
-                <label htmlFor="trialFilter">
-                    Trial status
-                    <select
-                        id="trialFilter"
-                        value={trialFilter}
-                        onChange={(e) => setTrialFilter(e.target.value)}
-                    >
-                        <option value="All">All</option>
-                        <option value="Yes">Trial</option>
-                        <option value="No">Not a trial</option>
-                    </select>
-                </label>
+                <form onSubmit={handleSubmit}>
+                    <div className="sn-form-grid">
+                        <div className="sn-field">
+                            <label htmlFor="serviceName">Service name</label>
+                            <input
+                                id="serviceName"
+                                className="sn-input"
+                                type="text"
+                                value={serviceName}
+                                onChange={(e) => setServiceName(e.target.value)}
+                                placeholder="e.g. Netflix"
+                            />
+                        </div>
 
-                <label htmlFor="categoryFilter">
-                    Category
-                    <select
-                        id="categoryFilter"
-                        value={categoryFilter}
-                        onChange={(e) => setCategoryFilter(e.target.value)}
-                    >
-                        <option value="All">All</option>
-                        {CATEGORIES.map((c) => (
-                            <option key={c} value={c}>
-                                {c}
-                            </option>
-                        ))}
-                    </select>
-                </label>
+                        <div className="sn-field">
+                            <label htmlFor="cost">Cost ($)</label>
+                            <input
+                                id="cost"
+                                className="sn-input"
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                value={cost}
+                                onChange={(e) => setCost(e.target.value)}
+                                placeholder="15.99"
+                            />
+                        </div>
 
-                <label htmlFor="cycleFilter">
-                    Billing cycle
-                    <select
-                        id="cycleFilter"
-                        value={cycleFilter}
-                        onChange={(e) => setCycleFilter(e.target.value)}
-                    >
-                        <option value="All">All</option>
-                        <option value="Monthly">Monthly</option>
-                        <option value="Annual">Annual</option>
-                    </select>
-                </label>
+                        <div className="sn-field">
+                            <label htmlFor="billingCycle">Billing cycle</label>
+                            <select
+                                id="billingCycle"
+                                className="sn-input"
+                                value={billingCycle}
+                                onChange={(e) => setBillingCycle(e.target.value)}
+                            >
+                                <option value="Monthly">Monthly</option>
+                                <option value="Annual">Annual</option>
+                            </select>
+                        </div>
 
-                <label htmlFor="sortBy">
-                    Sort by
-                    <select
-                        id="sortBy"
-                        value={sortBy}
-                        onChange={(e) => setSortBy(e.target.value)}
-                    >
-                        <option value="date">Next billing date (soonest first)</option>
-                        <option value="cost">Cost (highest first)</option>
-                    </select>
-                </label>
+                        <div className="sn-field">
+                            <label htmlFor="nextBillingDate">Next billing date</label>
+                            <input
+                                id="nextBillingDate"
+                                className="sn-input"
+                                type="date"
+                                value={nextBillingDate}
+                                onChange={(e) => setNextBillingDate(e.target.value)}
+                            />
+                        </div>
 
-                <button type="button" onClick={clearFilters}>
-                    Clear filters
-                </button>
-            </div>
+                        <div className="sn-field">
+                            <label htmlFor="category">Category</label>
+                            <select
+                                id="category"
+                                className="sn-input"
+                                value={category}
+                                onChange={(e) => setCategory(e.target.value)}
+                            >
+                                {CATEGORIES.map((c) => (
+                                    <option key={c} value={c}>
+                                        {c}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
 
-            {subscriptions.length > 0 && (
-                <p>
-                    Showing {visibleSubscriptions.length} of {subscriptions.length}
-                </p>
-            )}
+                        <label className="sn-check" htmlFor="isTrial">
+                            <input
+                                id="isTrial"
+                                type="checkbox"
+                                checked={isTrial}
+                                onChange={(e) => setIsTrial(e.target.checked)}
+                            />
+                            Is this a trial?
+                        </label>
+                    </div>
 
-            {subscriptions.length === 0 ? (
-                <p>No subscriptions yet. Add your first one above.</p>
-            ) : visibleSubscriptions.length === 0 ? (
-                <p>No subscriptions match your search or filters.</p>
-            ) : (
-                <div className="table-wrap">
-                    <table className="subs-table">
-                        <thead>
-                            <tr>
-                                <th>Service</th>
-                                <th>Cost</th>
-                                <th>Cycle</th>
-                                <th>Next billing</th>
-                                <th>Category</th>
-                                <th>Trial</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {visibleSubscriptions.map((s) => (
-                                <tr key={s.id}>
-                                    <td>{s.service_name}</td>
-                                    <td>${Number(s.cost).toFixed(2)}</td>
-                                    <td>{s.billing_cycle}</td>
-                                    <td>{s.next_billing_date}</td>
-                                    <td>{s.category}</td>
-                                    <td>{s.is_trial ? 'Yes' : 'No'}</td>
-                                    <td className="subs-actions">
-                                        <button type="button" onClick={() => handleEdit(s)}>
-                                            Edit
-                                        </button>
-                                        <button
-                                            type="button"
-                                            className="subs-delete"
-                                            onClick={() => handleDelete(s.id)}
-                                        >
-                                            Delete
-                                        </button>
-                                    </td>
-                                </tr>
+                    {error && <p className="error sn-message">{error}</p>}
+                    {success && <p className="success sn-message">{success}</p>}
+
+                    <div className="sn-form-actions">
+                        <button type="submit" className="sn-btn">
+                            {editingId ? 'Save changes' : 'Add subscription'}
+                        </button>
+                        {editingId && (
+                            <button
+                                type="button"
+                                className="sn-btn sn-btn-secondary"
+                                onClick={resetForm}
+                            >
+                                Cancel edit
+                            </button>
+                        )}
+                    </div>
+                </form>
+            </section>
+
+            <section className="sn-card" aria-labelledby="list-heading">
+                <h3 id="list-heading" className="sn-subheading">
+                    Your list
+                </h3>
+
+                <div className="sn-controls">
+                    <div className="sn-field">
+                        <label htmlFor="search">Search by service name</label>
+                        <input
+                            id="search"
+                            className="sn-input"
+                            type="text"
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            placeholder="e.g. Spotify"
+                        />
+                    </div>
+
+                    <div className="sn-field">
+                        <label htmlFor="trialFilter">Trial status</label>
+                        <select
+                            id="trialFilter"
+                            className="sn-input"
+                            value={trialFilter}
+                            onChange={(e) => setTrialFilter(e.target.value)}
+                        >
+                            <option value="All">All</option>
+                            <option value="Yes">Trial</option>
+                            <option value="No">Not a trial</option>
+                        </select>
+                    </div>
+
+                    <div className="sn-field">
+                        <label htmlFor="categoryFilter">Category</label>
+                        <select
+                            id="categoryFilter"
+                            className="sn-input"
+                            value={categoryFilter}
+                            onChange={(e) => setCategoryFilter(e.target.value)}
+                        >
+                            <option value="All">All</option>
+                            {CATEGORIES.map((c) => (
+                                <option key={c} value={c}>
+                                    {c}
+                                </option>
                             ))}
-                        </tbody>
-                    </table>
-                </div>
-            )}
+                        </select>
+                    </div>
 
-            <button onClick={() => navigate('/dashboard')}>Back to Dashboard</button>
+                    <div className="sn-field">
+                        <label htmlFor="cycleFilter">Billing cycle</label>
+                        <select
+                            id="cycleFilter"
+                            className="sn-input"
+                            value={cycleFilter}
+                            onChange={(e) => setCycleFilter(e.target.value)}
+                        >
+                            <option value="All">All</option>
+                            <option value="Monthly">Monthly</option>
+                            <option value="Annual">Annual</option>
+                        </select>
+                    </div>
+
+                    <div className="sn-field">
+                        <label htmlFor="sortBy">Sort by</label>
+                        <select
+                            id="sortBy"
+                            className="sn-input"
+                            value={sortBy}
+                            onChange={(e) => setSortBy(e.target.value)}
+                        >
+                            <option value="date">Next billing date (soonest first)</option>
+                            <option value="cost">Cost (highest first)</option>
+                        </select>
+                    </div>
+
+                    <button
+                        type="button"
+                        className="sn-btn sn-btn-secondary"
+                        onClick={clearFilters}
+                    >
+                        Clear filters
+                    </button>
+                </div>
+
+                {subscriptions.length > 0 && (
+                    <p className="sn-count">
+                        Showing {visibleSubscriptions.length} of {subscriptions.length}
+                    </p>
+                )}
+
+                {subscriptions.length === 0 ? (
+                    <p className="sn-empty">
+                        No subscriptions yet. Add your first one above.
+                    </p>
+                ) : visibleSubscriptions.length === 0 ? (
+                    <p className="sn-empty">
+                        No subscriptions match your search or filters.
+                    </p>
+                ) : (
+                    <div className="sn-table-wrap">
+                        <table className="sn-table">
+                            <thead>
+                                <tr>
+                                    <th>Service</th>
+                                    <th>Cost</th>
+                                    <th>Cycle</th>
+                                    <th>Next billing</th>
+                                    <th>Category</th>
+                                    <th>Trial</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {visibleSubscriptions.map((s) => (
+                                    <tr
+                                        key={s.id}
+                                        className={
+                                            isAlertDue(s.next_billing_date) ? 'sn-alert-row' : ''
+                                        }
+                                    >
+                                        <td data-label="Service">{s.service_name}</td>
+                                        <td data-label="Cost">${Number(s.cost).toFixed(2)}</td>
+                                        <td data-label="Cycle">{s.billing_cycle}</td>
+                                        <td data-label="Next billing">
+                                            <span>
+                                                {s.next_billing_date}
+                                                {isAlertDue(s.next_billing_date) && (
+                                                    <span className="sn-badge">Due soon</span>
+                                                )}
+                                            </span>
+                                        </td>
+                                        <td data-label="Category">{s.category}</td>
+                                        <td data-label="Trial">{trialLabel(s)}</td>
+                                        <td data-label="Actions">
+                                            <div className="sn-actions">
+                                                <button
+                                                    type="button"
+                                                    className="sn-btn sn-btn-small"
+                                                    onClick={() => handleEdit(s)}
+                                                >
+                                                    Edit
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    className="sn-btn sn-btn-small sn-btn-danger"
+                                                    onClick={() => handleDelete(s.id)}
+                                                >
+                                                    Delete
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
+            </section>
         </div>
     );
 }
