@@ -1,0 +1,192 @@
+/* =====================================================
+   Subscription Sniper - landing page (green and white)
+   ===================================================== */
+
+body:has(.land-page) {
+    display: block;
+    place-items: initial;
+    margin: 0;
+    background: #ffffff;
+}
+
+.land-page {
+    --primary: #15803d;
+    --primary-dark: #166534;
+    --text: #0f172a;
+    --muted: #475569;
+    --soft: #f0fdf4;
+    --soft-border: #bbf7d0;
+    --focus: #86efac;
+
+    width: 100%;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    color: var(--text);
+    text-align: left;
+}
+
+.land-page *,
+.land-page *::before,
+.land-page *::after {
+    box-sizing: border-box;
+}
+
+.land-page main {
+    flex: 1;
+}
+
+/* Header */
+.land-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    width: 100%;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 20px 24px;
+}
+
+.land-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.land-brand-name {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+/* Buttons (links styled as buttons) */
+.land-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 22px;
+    border: 2px solid var(--primary);
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background 0.15s;
+}
+
+.land-btn:focus-visible {
+    outline: 3px solid var(--focus);
+    outline-offset: 2px;
+}
+
+.land-btn-solid {
+    background: var(--primary);
+    color: #ffffff;
+}
+
+.land-btn-solid:hover {
+    background: var(--primary-dark);
+    border-color: var(--primary-dark);
+}
+
+.land-btn-outline {
+    background: #ffffff;
+    color: var(--primary);
+}
+
+.land-btn-outline:hover {
+    background: var(--soft);
+}
+
+/* Hero */
+.land-hero {
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 72px 24px 56px;
+    text-align: center;
+}
+
+.land-title {
+    margin: 0 0 20px;
+    font-size: 3rem;
+    line-height: 1.15;
+}
+
+.land-text {
+    margin: 0 auto 32px;
+    max-width: 620px;
+    color: var(--muted);
+    font-size: 1.15rem;
+    line-height: 1.6;
+}
+
+.land-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+}
+
+/* Feature cards */
+.land-features {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 20px;
+    width: 100%;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 24px 24px 72px;
+}
+
+.land-card {
+    background: var(--soft);
+    border: 1px solid var(--soft-border);
+    border-top: 4px solid var(--primary);
+    border-radius: 14px;
+    padding: 28px;
+}
+
+.land-card-title {
+    margin: 0 0 8px;
+    font-size: 1.2rem;
+    color: var(--primary-dark);
+}
+
+.land-card-text {
+    margin: 0;
+    color: var(--muted);
+    line-height: 1.55;
+}
+
+/* Footer */
+.land-footer {
+    padding: 24px;
+    border-top: 1px solid var(--soft-border);
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.9rem;
+}
+
+.land-footer p {
+    margin: 0;
+}
+
+/* Small screens */
+@media (max-width: 640px) {
+    .land-title {
+        font-size: 2.1rem;
+    }
+
+    .land-hero {
+        padding: 40px 16px 32px;
+    }
+
+    .land-header {
+        padding: 16px;
+    }
+
+    .land-features {
+        padding: 16px 16px 48px;
+    }
+}
