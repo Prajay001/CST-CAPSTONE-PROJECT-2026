@@ -1,0 +1,252 @@
+/* =====================================================
+   Subscription Sniper - shared styles for the sign-in pages
+   (Login, and later Register, Forgot and Reset password)
+   Green and white theme
+   Sections: 1 Page and layout, 2 Card, 3 Form, 4 Button,
+   5 Messages and links, 6 Side panel, 7 Small screens
+   ===================================================== */
+
+/* ---------- 1. Page and layout ---------- */
+.auth-page {
+    --primary: #15803d;
+    --primary-dark: #166534;
+    --text: #0f172a;
+    --muted: #475569;
+    --border: #cbd5e1;
+    --input-border: #64748b;
+    --soft: #f0fdf4;
+    --soft-border: #bbf7d0;
+    --focus: #86efac;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 100vh;
+    padding: 32px 24px;
+    background: #ffffff;
+    color: var(--text);
+}
+
+.auth-page *,
+.auth-page *::before,
+.auth-page *::after {
+    box-sizing: border-box;
+}
+
+/* Two columns: feature panel on the left, login card on the right */
+.auth-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 460px);
+    gap: 48px;
+    align-items: center;
+    width: 100%;
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+/* ---------- 2. Card ---------- */
+.auth-card {
+    width: 100%;
+    background: #ffffff;
+    border: 1px solid var(--soft-border);
+    border-radius: 16px;
+    padding: 40px;
+    box-shadow: 0 10px 25px rgba(22, 101, 52, 0.1);
+}
+
+.auth-logo {
+    display: block;
+    margin: 0 auto 12px;
+}
+
+.auth-brand {
+    margin: 0 0 6px;
+    text-align: center;
+    font-size: 1.75rem;
+    color: var(--primary);
+}
+
+.auth-tagline {
+    margin: 0 0 32px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.95rem;
+}
+
+.auth-title {
+    margin: 0 0 20px;
+    font-size: 1.25rem;
+}
+
+/* ---------- 3. Form ---------- */
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.auth-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.auth-input {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid var(--input-border);
+    border-radius: 8px;
+    background: #ffffff;
+    color: var(--text);
+    font-size: 1rem;
+    font-weight: 400;
+}
+
+.auth-input:focus-visible {
+    outline: 3px solid var(--focus);
+    outline-offset: 1px;
+    border-color: var(--primary);
+}
+
+/* ---------- 4. Button ---------- */
+.auth-button {
+    margin-top: 4px;
+    padding: 13px 16px;
+    border: none;
+    border-radius: 8px;
+    background: var(--primary);
+    color: #ffffff;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.auth-button:hover:not(:disabled) {
+    background: var(--primary-dark);
+}
+
+.auth-button:focus-visible {
+    outline: 3px solid var(--focus);
+    outline-offset: 2px;
+}
+
+.auth-button:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+/* ---------- 5. Messages and links ---------- */
+.auth-error {
+    margin: 0;
+    padding: 10px 12px;
+    border: 1px solid #fca5a5;
+    border-radius: 8px;
+    background: #fef2f2;
+    color: #991b1b;
+    font-size: 0.9rem;
+}
+
+.auth-links {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    margin-top: 28px;
+    padding-top: 24px;
+    border-top: 1px solid #e2e8f0;
+    font-size: 0.9rem;
+    color: var(--muted);
+}
+
+.auth-link {
+    color: var(--primary);
+    font-weight: 600;
+    text-decoration: underline;
+}
+
+.auth-link:hover {
+    color: var(--primary-dark);
+}
+
+/* ---------- 6. Side panel (shown on the left) ---------- */
+.auth-hero {
+    order: -1;
+    background: var(--soft);
+    border: 1px solid var(--soft-border);
+    border-radius: 24px;
+    padding: 48px;
+}
+
+.auth-hero-title {
+    margin: 0 0 16px;
+    font-size: 2rem;
+    line-height: 1.2;
+}
+
+.auth-hero-text {
+    margin: 0 0 28px;
+    color: var(--muted);
+    font-size: 1.05rem;
+}
+
+.auth-features {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.auth-features li {
+    position: relative;
+    padding-left: 36px;
+    font-weight: 600;
+}
+
+.auth-features li::before {
+    content: '\2713';
+    position: absolute;
+    left: 0;
+    top: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: #ffffff;
+    font-size: 0.85rem;
+}
+
+/* ---------- 7. Small screens ---------- */
+@media (max-width: 900px) {
+    .auth-layout {
+        grid-template-columns: minmax(0, 460px);
+        justify-content: center;
+    }
+
+    .auth-hero {
+        display: none;
+    }
+}
+
+@media (max-width: 480px) {
+    .auth-page {
+        padding: 16px;
+    }
+
+    .auth-card {
+        padding: 28px 20px;
+        border-radius: 12px;
+    }
+
+    .auth-brand {
+        font-size: 1.5rem;
+    }
+}

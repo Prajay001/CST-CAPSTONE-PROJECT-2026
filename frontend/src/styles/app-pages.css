@@ -1,0 +1,438 @@
+/* =====================================================
+   Subscription Sniper - shared styles for the app pages
+   (Dashboard and Subscriptions) - green and white theme
+   Sections: 0 Background, 1 Page and colours, 2 Header,
+   3 Buttons, 4 Cards and stats, 5 Alert, 6 Forms,
+   7 Table, 8 Mobile
+   ===================================================== */
+
+/* ---------- 0. Page background (overrides the Vite defaults) ---------- */
+body:has(.sn-page) {
+    display: block;
+    place-items: initial;
+    margin: 0;
+    background: #f0fdf4;
+}
+
+/* ---------- 1. Page and colours ---------- */
+.sn-page {
+    --primary: #15803d;
+    --primary-dark: #166534;
+    --text: #0f172a;
+    --muted: #475569;
+    --border: #cbd5e1;
+    --input-border: #64748b;
+    --soft: #f0fdf4;
+    --soft-border: #bbf7d0;
+    --focus: #86efac;
+    --danger: #b91c1c;
+    --danger-dark: #991b1b;
+    --rose: #e11d48;
+    --rose-soft: #ffe4e6;
+    --rose-text: #9f1239;
+    --radius: 14px;
+    --shadow: 0 1px 3px rgba(15, 23, 42, 0.08), 0 4px 12px rgba(15, 23, 42, 0.04);
+
+    width: 100%;
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 24px 16px 48px;
+    color: var(--text);
+    text-align: left;
+}
+
+.sn-page *,
+.sn-page *::before,
+.sn-page *::after {
+    box-sizing: border-box;
+}
+
+.sn-heading {
+    margin: 0 0 4px;
+    font-size: 1.75rem;
+}
+
+.sn-subtitle {
+    margin: 0 0 24px;
+    color: var(--muted);
+    font-size: 1rem;
+}
+
+.sn-subheading {
+    margin: 0 0 12px;
+    font-size: 1.15rem;
+}
+
+/* ---------- 2. Header ---------- */
+.sn-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 20px;
+    margin-bottom: 28px;
+    background: #ffffff;
+    border: 1px solid var(--soft-border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+}
+
+.sn-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.sn-brand img {
+    width: 36px;
+    height: 36px;
+}
+
+.sn-title {
+    margin: 0;
+    font-size: 1.35rem;
+    color: var(--primary);
+}
+
+.sn-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+/* ---------- 3. Buttons ---------- */
+.sn-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 16px;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    background: var(--primary);
+    color: #ffffff;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.sn-btn:hover {
+    background: var(--primary-dark);
+}
+
+.sn-btn:focus-visible {
+    outline: 3px solid var(--focus);
+    outline-offset: 2px;
+}
+
+.sn-btn-secondary {
+    background: #ffffff;
+    color: var(--primary);
+    border-color: var(--primary);
+}
+
+.sn-btn-secondary:hover {
+    background: var(--soft);
+}
+
+.sn-btn-danger {
+    background: var(--danger);
+}
+
+.sn-btn-danger:hover {
+    background: var(--danger-dark);
+}
+
+.sn-btn-small {
+    padding: 6px 12px;
+    font-size: 0.85rem;
+}
+
+/* ---------- 4. Cards and stats ---------- */
+.sn-card {
+    background: #ffffff;
+    border: 1px solid var(--soft-border);
+    border-radius: var(--radius);
+    padding: 24px;
+    box-shadow: var(--shadow);
+    margin-bottom: 24px;
+}
+
+.sn-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+    margin-bottom: 28px;
+}
+
+.sn-stat {
+    background: #ffffff;
+    border: 1px solid var(--soft-border);
+    border-top: 4px solid var(--primary);
+    border-radius: var(--radius);
+    padding: 22px;
+    box-shadow: var(--shadow);
+}
+
+.sn-stat-label {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.sn-stat-value {
+    margin: 8px 0 4px;
+    font-size: 2.25rem;
+    font-weight: 700;
+    line-height: 1.1;
+}
+
+.sn-stat-note {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.85rem;
+}
+
+/* Highlighted card (monthly burn rate) */
+.sn-stat-primary {
+    background: linear-gradient(135deg, #15803d, #166534);
+    border-color: #166534;
+    border-top-color: #86efac;
+    color: #ffffff;
+}
+
+.sn-stat-primary .sn-stat-label,
+.sn-stat-primary .sn-stat-note {
+    color: #dcfce7;
+}
+
+.sn-empty {
+    text-align: center;
+    padding: 40px 16px;
+    color: var(--muted);
+}
+
+.sn-empty p {
+    margin: 0 0 16px;
+    font-size: 1.05rem;
+}
+
+/* ---------- 5. 48-hour alert (stays red on purpose: it is a warning) ---------- */
+.sn-alert {
+    background: var(--rose-soft);
+    border: 2px solid var(--rose);
+    border-radius: var(--radius);
+    color: var(--rose-text);
+    padding: 16px 20px;
+    margin-bottom: 24px;
+}
+
+.sn-alert ul {
+    margin: 8px 0 0;
+    padding-left: 20px;
+}
+
+.sn-error {
+    margin: 0 0 16px;
+    padding: 10px 14px;
+    border: 1px solid #fca5a5;
+    border-radius: 8px;
+    background: #fef2f2;
+    color: #991b1b;
+}
+
+/* ---------- 6. Forms and controls ---------- */
+.sn-form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+}
+
+.sn-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.sn-input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--input-border);
+    border-radius: 8px;
+    background: #ffffff;
+    color: var(--text);
+    font-size: 1rem;
+    font-weight: 400;
+}
+
+.sn-input:focus-visible {
+    outline: 3px solid var(--focus);
+    outline-offset: 1px;
+    border-color: var(--primary);
+}
+
+.sn-check {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    align-self: end;
+    padding-bottom: 10px;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.sn-check input {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--primary);
+}
+
+.sn-message {
+    margin: 16px 0 0;
+}
+
+.sn-form-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 16px;
+}
+
+.sn-controls {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 12px;
+    align-items: end;
+    margin-bottom: 12px;
+}
+
+.sn-count {
+    margin: 0 0 12px;
+    color: var(--muted);
+    font-size: 0.9rem;
+}
+
+/* ---------- 7. Table ---------- */
+.sn-table-wrap {
+    overflow-x: auto;
+}
+
+.sn-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+}
+
+.sn-table th {
+    padding: 10px 12px;
+    text-align: left;
+    color: var(--primary-dark);
+    border-bottom: 2px solid var(--soft-border);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+}
+
+.sn-table td {
+    padding: 12px;
+    border-bottom: 1px solid #e2e8f0;
+    vertical-align: middle;
+}
+
+.sn-table tbody tr:hover {
+    background: #f7fef9;
+}
+
+.sn-table tbody tr.sn-alert-row {
+    background: var(--rose-soft);
+}
+
+.sn-badge {
+    display: inline-block;
+    margin-left: 8px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: #be123c;
+    color: #ffffff;
+    font-size: 0.75rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.sn-actions {
+    display: flex;
+    gap: 8px;
+}
+
+/* ---------- 8. Phones: rows become cards ---------- */
+@media (max-width: 640px) {
+    .sn-page {
+        padding: 16px 12px 32px;
+    }
+
+    .sn-header {
+        padding: 12px 14px;
+    }
+
+    .sn-title {
+        font-size: 1.15rem;
+    }
+
+    .sn-nav {
+        width: 100%;
+    }
+
+    .sn-nav .sn-btn {
+        flex: 1 1 auto;
+    }
+
+    .sn-stat-value {
+        font-size: 1.9rem;
+    }
+
+    .sn-table thead {
+        position: absolute;
+        left: -9999px;
+    }
+
+    .sn-table,
+    .sn-table tbody,
+    .sn-table tr,
+    .sn-table td {
+        display: block;
+        width: 100%;
+    }
+
+    .sn-table tr {
+        border: 1px solid var(--soft-border);
+        border-radius: var(--radius);
+        margin-bottom: 12px;
+        padding: 8px 12px;
+    }
+
+    .sn-table td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        padding: 8px 0;
+        border-bottom: 1px solid #f1f5f9;
+        text-align: right;
+    }
+
+    .sn-table td:last-child {
+        border-bottom: none;
+    }
+
+    .sn-table td::before {
+        content: attr(data-label);
+        font-weight: 600;
+        color: var(--muted);
+        text-align: left;
+    }
+}
