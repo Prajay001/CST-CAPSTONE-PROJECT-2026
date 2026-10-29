@@ -436,3 +436,98 @@ body:has(.sn-page) {
         text-align: left;
     }
 }
+
+/* ---------- 9. Category donut chart ---------- */
+.sn-chart {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 32px;
+}
+
+.sn-donut {
+    position: relative;
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.sn-donut-hole {
+    position: absolute;
+    inset: 36px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: #ffffff;
+    text-align: center;
+}
+
+.sn-donut-total {
+    font-size: 1.2rem;
+    font-weight: 700;
+}
+
+.sn-donut-label {
+    color: var(--muted);
+    font-size: 0.75rem;
+}
+
+.sn-legend {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    gap: 10px;
+    min-width: 220px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.sn-legend li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.sn-swatch {
+    width: 14px;
+    height: 14px;
+    border-radius: 4px;
+    flex-shrink: 0;
+}
+
+.sn-legend-name {
+    flex: 1;
+    font-weight: 600;
+}
+
+.sn-legend-value {
+    color: var(--muted);
+    font-size: 0.9rem;
+}
+
+/* ---------- 10. On-page messages and delete confirmation ---------- */
+.sn-success {
+    margin: 0 0 16px;
+    padding: 10px 14px;
+    border: 1px solid #86efac;
+    border-radius: 8px;
+    background: #f0fdf4;
+    color: #166534;
+}
+
+.sn-confirm {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+}
+
+.sn-confirm-text {
+    color: var(--danger-dark);
+    font-size: 0.9rem;
+    font-weight: 600;
+}
