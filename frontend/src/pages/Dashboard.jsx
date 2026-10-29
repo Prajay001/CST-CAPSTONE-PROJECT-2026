@@ -10,8 +10,32 @@ import {
     daysUntilBilling,
     describeDueDate,
 } from '../utils/alerts'
+import { getCategoryTotals } from '../utils/categoryTotals'
 import logo from '../assets/logo-icon.svg'
 import '../styles/app-pages.css'
+
+const CATEGORY_COLORS = [
+    '#15803d',
+    '#0369a1',
+    '#d97706',
+    '#7c3aed',
+    '#be123c',
+    '#0d9488',
+    '#475569',
+]
+
+// Builds the conic-gradient text that draws the donut slices
+function buildDonutGradient(rows) {
+    let start = 0
+    const parts = rows.map((row, index) => {
+        const end = start + row.percent
+        const color = CATEGORY_COLORS[index % CATEGORY_COLORS.length]
+        const part = `${color} ${start}% ${end}%`
+        start = end
+        return part
+    })
+    return `conic-gradient(${parts.join(', ')})`
+}
 
 function Dashboard() {
     const navigate = useNavigate()
@@ -50,6 +74,8 @@ function Dashboard() {
     const monthlyBurnRate = calculateMonthlyBurnRate(subscriptions)
     const yearlyProjection = calculateYearlyProjection(subscriptions)
     const alertSubscriptions = getAlertSubscriptions(subscriptions)
+    const categoryRows = getCategoryTotals(subscriptions)
+    const categoryTotal = categoryRows.reduce((sum, row) => sum + row.monthly, 0)
 
     return (
         <div className="sn-page">
@@ -126,6 +152,52 @@ function Dashboard() {
                     <p className="sn-stat-note">being tracked</p>
                 </div>
             </div>
+
+            {categoryTotal > 0 && (
+                <section className="sn-card" aria-label="Spending by category">
+                    <h3 className="sn-subheading">Spending by category</h3>
+                    <div className="sn-chart">
+                        <div
+                            className="sn-donut"
+                            style={{ background: buildDonutGradient(categoryRows) }}
+                            role="img"
+                            aria-label={`Monthly spending by category: ${categoryRows
+                                .map(
+                                    (r) =>
+                                        `${r.category} $${r.monthly.toFixed(2)}`
+                                )
+                                .join(', ')}`}
+                        >
+                            <div className="sn-donut-hole">
+                                <span className="sn-donut-total">
+                                    ${categoryTotal.toFixed(2)}
+                                </span>
+                                <span className="sn-donut-label">per month</span>
+                            </div>
+                        </div>
+
+                        <ul className="sn-legend">
+                            {categoryRows.map((row, index) => (
+                                <li key={row.category}>
+                                    <span
+                                        className="sn-swatch"
+                                        style={{
+                                            background:
+                                                CATEGORY_COLORS[
+                                                index % CATEGORY_COLORS.length
+                                                ],
+                                        }}
+                                    />
+                                    <span className="sn-legend-name">{row.category}</span>
+                                    <span className="sn-legend-value">
+                                        ${row.monthly.toFixed(2)} ({row.percent.toFixed(0)}%)
+                                    </span>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                </section>
+            )}
 
             {loaded && !loadError && subscriptions.length === 0 && (
                 <div className="sn-card sn-empty">
