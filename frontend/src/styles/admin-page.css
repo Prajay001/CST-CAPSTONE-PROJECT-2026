@@ -1,0 +1,86 @@
+/* Admin page extras (works together with app-pages.css) */
+
+.admin-count {
+    margin: 0 0 12px;
+    color: #475569;
+    font-size: 0.95rem;
+}
+
+.admin-table-wrap {
+    overflow-x: auto;
+}
+
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 720px;
+}
+
+.admin-table th,
+.admin-table td {
+    text-align: left;
+    padding: 10px 12px;
+    border-bottom: 1px solid #dcfce7;
+    vertical-align: middle;
+    font-size: 0.95rem;
+}
+
+.admin-table th {
+    background: #f0fdf4;
+    color: #14532d;
+    font-weight: 700;
+}
+
+.admin-you {
+    color: #15803d;
+    font-weight: 700;
+}
+
+.admin-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.admin-badge-on {
+    background: #dcfce7;
+    color: #14532d;
+}
+
+.admin-badge-off {
+    background: #fef3c7;
+    color: #78350f;
+}
+
+.admin-protected {
+    color: #475569;
+    font-size: 0.9rem;
+}
+
+.admin-actions,
+.admin-confirm {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+}
+
+.admin-days {
+    font-size: 0.9rem;
+    color: #334155;
+}
+
+.admin-days-input {
+    width: 70px;
+    padding: 6px 8px;
+    border: 1px solid #86a897;
+    border-radius: 6px;
+    font-size: 0.95rem;
+}
+
+.admin-days-input:focus {
+    outline: 2px solid #15803d;
+    outline-offset: 1px;
+}
