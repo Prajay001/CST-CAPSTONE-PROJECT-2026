@@ -296,3 +296,8 @@
     color: var(--muted);
     font-size: 0.85rem;
 }
+
+/* Space under a hint that comes right after a page title */
+.auth-title+.auth-hint {
+    margin: 0 0 16px;
+}
