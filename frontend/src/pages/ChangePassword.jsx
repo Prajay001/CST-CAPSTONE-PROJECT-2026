@@ -1,7 +1,9 @@
 import { useState } from 'react'
 import { supabase } from '../supabaseClient'
-import { useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { validatePassword } from './Register'
+import logo from '../assets/logo-icon.svg'
+import '../styles/auth-pages.css'
 
 function ChangePassword() {
     const [newPassword, setNewPassword] = useState('')
@@ -9,7 +11,6 @@ function ChangePassword() {
     const [error, setError] = useState('')
     const [message, setMessage] = useState('')
     const [loading, setLoading] = useState(false)
-    const navigate = useNavigate()
 
     const handleChangePassword = async (e) => {
         e.preventDefault()
@@ -43,36 +44,73 @@ function ChangePassword() {
     }
 
     return (
-        <div className="auth-container">
-            <div className="brand">
-                <div className="brand-icon">🎯</div>
-                <h1>Subscription Sniper</h1>
+        <main className="auth-page">
+            <div className="auth-layout auth-layout-single">
+                <div className="auth-card">
+                    <img
+                        className="auth-logo"
+                        src={logo}
+                        alt=""
+                        width="56"
+                        height="56"
+                    />
+                    <h1 className="auth-brand">Subscription Sniper</h1>
+                    <p className="auth-tagline">Enter your new password below</p>
+
+                    <h2 className="auth-title">Change Password</h2>
+
+                    <form className="auth-form" onSubmit={handleChangePassword}>
+                        <label className="auth-field">
+                            New password
+                            <input
+                                className="auth-input"
+                                type="password"
+                                placeholder="New password"
+                                value={newPassword}
+                                onChange={(e) => setNewPassword(e.target.value)}
+                                required
+                            />
+                        </label>
+                        <label className="auth-field">
+                            Confirm new password
+                            <input
+                                className="auth-input"
+                                type="password"
+                                placeholder="Confirm new password"
+                                value={confirmPassword}
+                                onChange={(e) => setConfirmPassword(e.target.value)}
+                                required
+                            />
+                        </label>
+                        <p className="auth-hint">
+                            Must be 8+ characters with uppercase, lowercase, number, and
+                            special character
+                        </p>
+
+                        {error && (
+                            <p className="auth-error error" role="alert">
+                                {error}
+                            </p>
+                        )}
+                        {message && (
+                            <p className="auth-success success" role="status">
+                                {message}
+                            </p>
+                        )}
+
+                        <button className="auth-button" type="submit" disabled={loading}>
+                            {loading ? 'Updating...' : 'Change Password'}
+                        </button>
+                    </form>
+
+                    <div className="auth-links">
+                        <Link className="auth-link" to="/dashboard">
+                            Back to Dashboard
+                        </Link>
+                    </div>
+                </div>
             </div>
-            <h2>Change Password</h2>
-            <p className="auth-subtitle">Enter your new password below</p>
-            <form onSubmit={handleChangePassword}>
-                <input
-                    type="password"
-                    placeholder="New password"
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    required
-                />
-                <input
-                    type="password"
-                    placeholder="Confirm new password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    required
-                />
-                {error && <p className="error">{error}</p>}
-                {message && <p className="success">{message}</p>}
-                <button type="submit" disabled={loading}>
-                    {loading ? 'Updating...' : 'Change Password'}
-                </button>
-            </form>
-            <p><a onClick={() => navigate('/dashboard')} style={{ cursor: 'pointer' }}>Back to Dashboard</a></p>
-        </div>
+        </main>
     )
 }
 
