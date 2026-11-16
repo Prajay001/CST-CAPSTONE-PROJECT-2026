@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
-import { filterAndSortSubscriptions } from '../utils/subscriptionFilters';
 import { isAlertDue, trialLabel } from '../utils/alerts';
+import logo from '../assets/logo-icon.svg';
 import '../styles/app-pages.css';
 
 const CATEGORIES = ['Entertainment', 'Productivity', 'Utilities', 'Health'];
@@ -10,7 +10,9 @@ const CATEGORIES = ['Entertainment', 'Productivity', 'Utilities', 'Health'];
 function Subscriptions() {
     const navigate = useNavigate();
 
-    const [subscriptions, setSubscriptions] = useState([]);
+    const [ready, setReady] = useState(false); // true once we know the user is logged in
+    const [subscriptions, setSubscriptions] = useState([]); // all of the user's rows
+    const [visibleSubscriptions, setVisibleSubscriptions] = useState([]); // after search/filter/sort
     const [serviceName, setServiceName] = useState('');
     const [cost, setCost] = useState('');
     const [billingCycle, setBillingCycle] = useState('Monthly');
@@ -18,6 +20,7 @@ function Subscriptions() {
     const [isTrial, setIsTrial] = useState(false);
     const [category, setCategory] = useState('Entertainment');
     const [editingId, setEditingId] = useState(null); // null = adding, id = editing
+    const [confirmDeleteId, setConfirmDeleteId] = useState(null); // row asking "are you sure?"
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
 
@@ -28,18 +31,16 @@ function Subscriptions() {
     const [cycleFilter, setCycleFilter] = useState('All');
     const [sortBy, setSortBy] = useState('date');
 
-    // Get this user's subscriptions from the database
+    // Get ALL of this user's subscriptions (SQL function with default settings)
     async function loadSubscriptions() {
-        const { data, error: loadError } = await supabase
-            .from('subscriptions')
-            .select('*');
+        const { data, error: loadError } = await supabase.rpc('list_subscriptions');
 
         if (loadError) {
             console.error('Load error:', loadError);
             setError('Could not load your subscriptions. Please try again.');
             return;
         }
-        setSubscriptions(data);
+        setSubscriptions(data || []);
     }
 
     useEffect(() => {
@@ -49,20 +50,41 @@ function Subscriptions() {
                 navigate('/login');
                 return;
             }
+            setReady(true);
             loadSubscriptions();
         }
         init();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    // The rows actually shown: filtered and sorted from the full list
-    const visibleSubscriptions = filterAndSortSubscriptions(subscriptions, {
-        search: search,
-        trial: trialFilter,
-        category: categoryFilter,
-        cycle: cycleFilter,
-        sortBy: sortBy,
-    });
+    // Search, filter and sort run in the database (SQL function list_subscriptions)
+    useEffect(() => {
+        if (!ready) return;
+        let ignore = false;
+
+        async function loadVisible() {
+            const { data, error: listError } = await supabase.rpc('list_subscriptions', {
+                p_search: search.trim(),
+                p_trial: trialFilter,
+                p_category: categoryFilter,
+                p_cycle: cycleFilter,
+                p_sort: sortBy,
+            });
+
+            if (ignore) return; // a newer search already started
+            if (listError) {
+                console.error('List error:', listError);
+                setError('Could not load your subscriptions. Please try again.');
+                return;
+            }
+            setVisibleSubscriptions(data || []);
+        }
+
+        loadVisible();
+        return () => {
+            ignore = true;
+        };
+    }, [ready, subscriptions, search, trialFilter, categoryFilter, cycleFilter, sortBy]);
 
     function clearFilters() {
         setSearch('');
@@ -87,6 +109,7 @@ function Subscriptions() {
     function handleEdit(s) {
         setError('');
         setSuccess('');
+        setConfirmDeleteId(null);
         setEditingId(s.id);
         setServiceName(s.service_name);
         setCost(String(s.cost));
@@ -97,12 +120,16 @@ function Subscriptions() {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    async function handleDelete(id) {
-        const confirmed = window.confirm(
-            'Delete this subscription? This cannot be undone.'
-        );
-        if (!confirmed) return;
+    // Step 1 of delete: ask on the page (no browser pop-up)
+    function askDelete(id) {
+        setError('');
+        setSuccess('');
+        setConfirmDeleteId(id);
+    }
 
+    // Step 2 of delete: the user clicked "Yes, delete"
+    async function handleDelete(id) {
+        setConfirmDeleteId(null);
         setError('');
         setSuccess('');
 
@@ -110,6 +137,9 @@ function Subscriptions() {
             .from('subscriptions')
             .delete()
             .eq('id', id);
+
+        // Scroll up so the message under the heading is always visible
+        window.scrollTo({ top: 0, behavior: 'smooth' });
 
         if (deleteError) {
             console.error('Delete error:', deleteError);
@@ -186,7 +216,10 @@ function Subscriptions() {
     return (
         <div className="sn-page">
             <header className="sn-header">
-                <h1 className="sn-title">Subscription Sniper</h1>
+                <div className="sn-brand">
+                    <img src={logo} alt="" width="36" height="36" />
+                    <h1 className="sn-title">Subscription Sniper</h1>
+                </div>
                 <nav className="sn-nav" aria-label="Main navigation">
                     <button
                         type="button"
@@ -199,6 +232,18 @@ function Subscriptions() {
             </header>
 
             <h2 className="sn-heading">My Subscriptions</h2>
+
+            {/* All messages show here, on the page (no browser pop-ups) */}
+            {error && (
+                <p className="sn-error" role="alert">
+                    {error}
+                </p>
+            )}
+            {success && (
+                <p className="sn-success" role="status">
+                    {success}
+                </p>
+            )}
 
             <section className="sn-card" aria-labelledby="form-heading">
                 <h3 id="form-heading" className="sn-subheading">
@@ -283,9 +328,6 @@ function Subscriptions() {
                             Is this a trial?
                         </label>
                     </div>
-
-                    {error && <p className="error sn-message">{error}</p>}
-                    {success && <p className="success sn-message">{success}</p>}
 
                     <div className="sn-form-actions">
                         <button type="submit" className="sn-btn">
@@ -439,22 +481,49 @@ function Subscriptions() {
                                         <td data-label="Category">{s.category}</td>
                                         <td data-label="Trial">{trialLabel(s)}</td>
                                         <td data-label="Actions">
-                                            <div className="sn-actions">
-                                                <button
-                                                    type="button"
-                                                    className="sn-btn sn-btn-small"
-                                                    onClick={() => handleEdit(s)}
+                                            {confirmDeleteId === s.id ? (
+                                                <div
+                                                    className="sn-confirm"
+                                                    role="group"
+                                                    aria-label={`Confirm delete ${s.service_name}`}
                                                 >
-                                                    Edit
-                                                </button>
-                                                <button
-                                                    type="button"
-                                                    className="sn-btn sn-btn-small sn-btn-danger"
-                                                    onClick={() => handleDelete(s.id)}
-                                                >
-                                                    Delete
-                                                </button>
-                                            </div>
+                                                    <span className="sn-confirm-text">
+                                                        Delete {s.service_name}?
+                                                    </span>
+                                                    <button
+                                                        type="button"
+                                                        className="sn-btn sn-btn-small sn-btn-danger"
+                                                        onClick={() => handleDelete(s.id)}
+                                                    >
+                                                        Yes, delete
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        className="sn-btn sn-btn-small sn-btn-secondary"
+                                                        onClick={() => setConfirmDeleteId(null)}
+                                                        autoFocus
+                                                    >
+                                                        Cancel
+                                                    </button>
+                                                </div>
+                                            ) : (
+                                                <div className="sn-actions">
+                                                    <button
+                                                        type="button"
+                                                        className="sn-btn sn-btn-small"
+                                                        onClick={() => handleEdit(s)}
+                                                    >
+                                                        Edit
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        className="sn-btn sn-btn-small sn-btn-danger"
+                                                        onClick={() => askDelete(s.id)}
+                                                    >
+                                                        Delete
+                                                    </button>
+                                                </div>
+                                            )}
                                         </td>
                                     </tr>
                                 ))}
