@@ -39,4 +39,20 @@ describe('getCategoryTotals', () => {
         expect(result.find((r) => r.category === 'Uncategorized').monthly).toBe(5)
         expect(getCategoryTotals([])).toEqual([])
     })
+
+    it('TC-UNIT-10: percentages are 25, 25 and 50 and add up to 100', () => {
+        const unit10 = [
+            { id: 1, service_name: 'Netflix', cost: 10, category: 'Entertainment' },
+            { id: 2, service_name: 'Notion', cost: 10, category: 'Productivity' },
+            { id: 3, service_name: 'Hydro', cost: 20, category: 'Utilities' },
+        ]
+        const result = getCategoryTotals(unit10)
+
+        expect(result.find((r) => r.category === 'Entertainment').percent).toBeCloseTo(25, 1)
+        expect(result.find((r) => r.category === 'Productivity').percent).toBeCloseTo(25, 1)
+        expect(result.find((r) => r.category === 'Utilities').percent).toBeCloseTo(50, 1)
+
+        const total = result.reduce((sum, r) => sum + r.percent, 0)
+        expect(total).toBeCloseTo(100, 1)
+    })
 })
