@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
-import { filterAndSortSubscriptions } from '../utils/subscriptionFilters';
 import { isAlertDue, trialLabel } from '../utils/alerts';
 import logo from '../assets/logo-icon.svg';
 import '../styles/app-pages.css';
@@ -11,7 +10,9 @@ const CATEGORIES = ['Entertainment', 'Productivity', 'Utilities', 'Health'];
 function Subscriptions() {
     const navigate = useNavigate();
 
-    const [subscriptions, setSubscriptions] = useState([]);
+    const [ready, setReady] = useState(false); // true once we know the user is logged in
+    const [subscriptions, setSubscriptions] = useState([]); // all of the user's rows
+    const [visibleSubscriptions, setVisibleSubscriptions] = useState([]); // after search/filter/sort
     const [serviceName, setServiceName] = useState('');
     const [cost, setCost] = useState('');
     const [billingCycle, setBillingCycle] = useState('Monthly');
@@ -30,18 +31,16 @@ function Subscriptions() {
     const [cycleFilter, setCycleFilter] = useState('All');
     const [sortBy, setSortBy] = useState('date');
 
-    // Get this user's subscriptions from the database
+    // Get ALL of this user's subscriptions (SQL function with default settings)
     async function loadSubscriptions() {
-        const { data, error: loadError } = await supabase
-            .from('subscriptions')
-            .select('*');
+        const { data, error: loadError } = await supabase.rpc('list_subscriptions');
 
         if (loadError) {
             console.error('Load error:', loadError);
             setError('Could not load your subscriptions. Please try again.');
             return;
         }
-        setSubscriptions(data);
+        setSubscriptions(data || []);
     }
 
     useEffect(() => {
@@ -51,20 +50,41 @@ function Subscriptions() {
                 navigate('/login');
                 return;
             }
+            setReady(true);
             loadSubscriptions();
         }
         init();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    // The rows actually shown: filtered and sorted from the full list
-    const visibleSubscriptions = filterAndSortSubscriptions(subscriptions, {
-        search: search,
-        trial: trialFilter,
-        category: categoryFilter,
-        cycle: cycleFilter,
-        sortBy: sortBy,
-    });
+    // Search, filter and sort run in the database (SQL function list_subscriptions)
+    useEffect(() => {
+        if (!ready) return;
+        let ignore = false;
+
+        async function loadVisible() {
+            const { data, error: listError } = await supabase.rpc('list_subscriptions', {
+                p_search: search.trim(),
+                p_trial: trialFilter,
+                p_category: categoryFilter,
+                p_cycle: cycleFilter,
+                p_sort: sortBy,
+            });
+
+            if (ignore) return; // a newer search already started
+            if (listError) {
+                console.error('List error:', listError);
+                setError('Could not load your subscriptions. Please try again.');
+                return;
+            }
+            setVisibleSubscriptions(data || []);
+        }
+
+        loadVisible();
+        return () => {
+            ignore = true;
+        };
+    }, [ready, subscriptions, search, trialFilter, categoryFilter, cycleFilter, sortBy]);
 
     function clearFilters() {
         setSearch('');

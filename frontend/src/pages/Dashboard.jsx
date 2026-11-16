@@ -1,16 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
-import {
-    calculateMonthlyBurnRate,
-    calculateYearlyProjection,
-} from '../utils/calculations'
-import {
-    getAlertSubscriptions,
-    daysUntilBilling,
-    describeDueDate,
-} from '../utils/alerts'
-import { getCategoryTotals } from '../utils/categoryTotals'
+import { daysUntilBilling, describeDueDate } from '../utils/alerts'
 import logo from '../assets/logo-icon.svg'
 import '../styles/app-pages.css'
 
@@ -24,11 +15,20 @@ const CATEGORY_COLORS = [
     '#475569',
 ]
 
+const EMPTY_SUMMARY = {
+    monthly_burn_rate: 0,
+    yearly_projection: 0,
+    subscription_count: 0,
+    categories: [],
+    alerts: [],
+}
+
 // Builds the conic-gradient text that draws the donut slices
 function buildDonutGradient(rows) {
     let start = 0
     const parts = rows.map((row, index) => {
-        const end = start + row.percent
+        const isLast = index === rows.length - 1
+        const end = isLast ? 100 : start + Number(row.percent)
         const color = CATEGORY_COLORS[index % CATEGORY_COLORS.length]
         const part = `${color} ${start}% ${end}%`
         start = end
@@ -39,31 +39,30 @@ function buildDonutGradient(rows) {
 
 function Dashboard() {
     const navigate = useNavigate()
-    const [subscriptions, setSubscriptions] = useState([])
+    const [summary, setSummary] = useState(EMPTY_SUMMARY)
     const [loadError, setLoadError] = useState('')
     const [loaded, setLoaded] = useState(false)
 
     useEffect(() => {
-        async function loadSubscriptions() {
+        async function loadSummary() {
             const { data: sessionData } = await supabase.auth.getSession()
             if (!sessionData.session) {
                 navigate('/login')
                 return
             }
 
-            const { data, error } = await supabase
-                .from('subscriptions')
-                .select('*')
+            // One SQL function (dashboard_summary) calculates everything
+            const { data, error } = await supabase.rpc('dashboard_summary')
 
             if (error) {
                 console.error('Dashboard load error:', error)
                 setLoadError('Could not load your subscription totals.')
             } else {
-                setSubscriptions(data)
+                setSummary({ ...EMPTY_SUMMARY, ...data })
             }
             setLoaded(true)
         }
-        loadSubscriptions()
+        loadSummary()
     }, [navigate])
 
     const handleLogout = async () => {
@@ -71,11 +70,15 @@ function Dashboard() {
         navigate('/login')
     }
 
-    const monthlyBurnRate = calculateMonthlyBurnRate(subscriptions)
-    const yearlyProjection = calculateYearlyProjection(subscriptions)
-    const alertSubscriptions = getAlertSubscriptions(subscriptions)
-    const categoryRows = getCategoryTotals(subscriptions)
-    const categoryTotal = categoryRows.reduce((sum, row) => sum + row.monthly, 0)
+    const monthlyBurnRate = Number(summary.monthly_burn_rate)
+    const yearlyProjection = Number(summary.yearly_projection)
+    const subscriptionCount = Number(summary.subscription_count)
+    const alertSubscriptions = summary.alerts
+    const categoryRows = summary.categories
+    const categoryTotal = categoryRows.reduce(
+        (sum, row) => sum + Number(row.monthly_cost),
+        0
+    )
 
     return (
         <div className="sn-page">
@@ -148,7 +151,7 @@ function Dashboard() {
                 </div>
                 <div className="sn-stat">
                     <p className="sn-stat-label">Subscriptions</p>
-                    <p className="sn-stat-value">{subscriptions.length}</p>
+                    <p className="sn-stat-value">{subscriptionCount}</p>
                     <p className="sn-stat-note">being tracked</p>
                 </div>
             </div>
@@ -164,7 +167,7 @@ function Dashboard() {
                             aria-label={`Monthly spending by category: ${categoryRows
                                 .map(
                                     (r) =>
-                                        `${r.category} $${r.monthly.toFixed(2)}`
+                                        `${r.category} $${Number(r.monthly_cost).toFixed(2)}`
                                 )
                                 .join(', ')}`}
                         >
@@ -190,7 +193,8 @@ function Dashboard() {
                                     />
                                     <span className="sn-legend-name">{row.category}</span>
                                     <span className="sn-legend-value">
-                                        ${row.monthly.toFixed(2)} ({row.percent.toFixed(0)}%)
+                                        ${Number(row.monthly_cost).toFixed(2)} (
+                                        {Number(row.percent).toFixed(0)}%)
                                     </span>
                                 </li>
                             ))}
@@ -199,7 +203,7 @@ function Dashboard() {
                 </section>
             )}
 
-            {loaded && !loadError && subscriptions.length === 0 && (
+            {loaded && !loadError && subscriptionCount === 0 && (
                 <div className="sn-card sn-empty">
                     <p>You have no subscriptions yet.</p>
                     <button className="sn-btn" onClick={() => navigate('/subscriptions')}>
