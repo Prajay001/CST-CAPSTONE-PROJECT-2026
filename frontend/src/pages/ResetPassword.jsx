@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react'
 import { supabase } from '../supabaseClient'
 import { useNavigate, Link } from 'react-router-dom'
 import { validatePassword } from './Register'
+import logo from '../assets/logo-icon.svg'
+import '../styles/auth-pages.css'
 
 function ResetPassword() {
     const [newPassword, setNewPassword] = useState('')
@@ -56,47 +58,80 @@ function ResetPassword() {
     }
 
     return (
-        <div className="auth-container">
-            <div className="brand">
-                <div className="brand-icon">🎯</div>
-                <h1>Subscription Sniper</h1>
-            </div>
-            <h2>Set a new password</h2>
+        <main className="auth-page">
+            <div className="auth-layout auth-layout-single">
+                <div className="auth-card">
+                    <img
+                        className="auth-logo"
+                        src={logo}
+                        alt=""
+                        width="56"
+                        height="56"
+                    />
+                    <h1 className="auth-brand">Subscription Sniper</h1>
+                    <p className="auth-tagline">Never get charged by surprise again</p>
 
-            {!ready ? (
-                <>
-                    <p className="auth-subtitle">
-                        This page only works from the link in your reset email.
-                    </p>
-                    <p><Link to="/forgot-password">Request a new reset link</Link></p>
-                </>
-            ) : (
-                <>
-                    <p className="auth-subtitle">Enter your new password below</p>
-                    <form onSubmit={handleReset}>
-                        <input
-                            type="password"
-                            placeholder="New password"
-                            value={newPassword}
-                            onChange={(e) => setNewPassword(e.target.value)}
-                            required
-                        />
-                        <input
-                            type="password"
-                            placeholder="Confirm new password"
-                            value={confirmPassword}
-                            onChange={(e) => setConfirmPassword(e.target.value)}
-                            required
-                        />
-                        {error && <p className="error">{error}</p>}
-                        {message && <p className="success">{message}</p>}
-                        <button type="submit" disabled={loading}>
-                            {loading ? 'Updating...' : 'Update Password'}
-                        </button>
-                    </form>
-                </>
-            )}
-        </div>
+                    <h2 className="auth-title">Set a new password</h2>
+
+                    {!ready ? (
+                        <>
+                            <p className="auth-hint">
+                                This page only works from the link in your reset email.
+                            </p>
+                            <div className="auth-links">
+                                <Link className="auth-link" to="/forgot-password">
+                                    Request a new reset link
+                                </Link>
+                            </div>
+                        </>
+                    ) : (
+                        <form className="auth-form" onSubmit={handleReset}>
+                            <label className="auth-field">
+                                New password
+                                <input
+                                    className="auth-input"
+                                    type="password"
+                                    placeholder="New password"
+                                    value={newPassword}
+                                    onChange={(e) => setNewPassword(e.target.value)}
+                                    required
+                                />
+                            </label>
+                            <label className="auth-field">
+                                Confirm new password
+                                <input
+                                    className="auth-input"
+                                    type="password"
+                                    placeholder="Confirm new password"
+                                    value={confirmPassword}
+                                    onChange={(e) => setConfirmPassword(e.target.value)}
+                                    required
+                                />
+                            </label>
+                            <p className="auth-hint">
+                                Must be 8+ characters with uppercase, lowercase, number,
+                                and special character
+                            </p>
+
+                            {error && (
+                                <p className="auth-error error" role="alert">
+                                    {error}
+                                </p>
+                            )}
+                            {message && (
+                                <p className="auth-success success" role="status">
+                                    {message}
+                                </p>
+                            )}
+
+                            <button className="auth-button" type="submit" disabled={loading}>
+                                {loading ? 'Updating...' : 'Update Password'}
+                            </button>
+                        </form>
+                    )}
+                </div>
+            </div>
+        </main>
     )
 }
 
